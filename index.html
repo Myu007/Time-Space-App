@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
@@ -12,82 +13,79 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- ═══════════════════════════════════════
-  ⚙️  FIREBASE SETUP — PASTE YOUR CONFIG BELOW
-  1. Go to console.firebase.google.com
-  2. Create a project → Add a web app
-  3. Copy the firebaseConfig object and replace below
-  4. In Firebase console: Authentication → Sign-in method → Enable Google, Email/Password
-  5. Firestore Database → Create database (start in test mode)
-═══════════════════════════════════════ -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, FacebookAuthProvider, OAuthProvider,
-           createUserWithEmailAndPassword, signInWithEmailAndPassword,
-           signInWithPopup, signOut, onAuthStateChanged, updateProfile,
-           sendPasswordResetEmail }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, collection, getDocs, addDoc, deleteDoc,
-           updateDoc, onSnapshot, query, orderBy }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+  import { getAnalytics }
+    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
+  import {
+    getAuth, GoogleAuthProvider, FacebookAuthProvider, OAuthProvider,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signInWithPopup, signOut, onAuthStateChanged, updateProfile,
+    sendPasswordResetEmail
+  } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+  import {
+    getFirestore, doc, collection,
+    addDoc, deleteDoc, updateDoc, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-  // ─── PASTE YOUR FIREBASE CONFIG HERE ───────────────────────────
+  // ── YOUR FIREBASE CONFIG ────────────────────────────────────────
   const firebaseConfig = {
-    apiKey:            "PASTE_YOUR_API_KEY",
-    authDomain:        "PASTE_YOUR_AUTH_DOMAIN",
-    projectId:         "PASTE_YOUR_PROJECT_ID",
-    storageBucket:     "PASTE_YOUR_STORAGE_BUCKET",
-    messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
-    appId:             "PASTE_YOUR_APP_ID"
+    apiKey:            "AIzaSyC4BmkITV_T0YE5JZgOeKZp45nNIY3MieE",
+    authDomain:        "timespace-39696.firebaseapp.com",
+    projectId:         "timespace-39696",
+    storageBucket:     "timespace-39696.firebasestorage.app",
+    messagingSenderId: "388405564753",
+    appId:             "1:388405564753:web:da5afeefa8dcda1198ef70",
+    measurementId:     "G-J69EWSVBPF"
   };
   // ────────────────────────────────────────────────────────────────
 
-  const app  = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db   = getFirestore(app);
+  const app      = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth     = getAuth(app);
+  const db       = getFirestore(app);
 
-  // Providers
   const googleProvider   = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
   const appleProvider    = new OAuthProvider('apple.com');
   appleProvider.addScope('email');
   appleProvider.addScope('name');
 
-  let currentUser   = null;
-  let unsubEvents   = null;  // Firestore listener unsubscribe
+  let unsubEvents = null;
 
-  /* ─── EXPOSE TO GLOBAL SCOPE ─── */
+  // Expose everything to the non-module scripts below
   window._fb = {
     auth, db, googleProvider, facebookProvider, appleProvider,
-    GoogleAuthProvider, FacebookAuthProvider, OAuthProvider,
     createUserWithEmailAndPassword, signInWithEmailAndPassword,
     signInWithPopup, signOut, onAuthStateChanged, updateProfile,
     sendPasswordResetEmail,
-    doc, collection, getDocs, addDoc, deleteDoc, updateDoc,
-    onSnapshot, query, orderBy
+    doc, collection, addDoc, deleteDoc, updateDoc, onSnapshot
   };
 
-  /* ─── AUTH STATE LISTENER ─── */
-  onAuthStateChanged(auth, async (user) => {
-    currentUser = user;
+  // Auth state
+  onAuthStateChanged(auth, (user) => {
     window._currentUser = user;
     if (user) {
       showApp(user);
       subscribeEvents(user.uid);
     } else {
       if (unsubEvents) { unsubEvents(); unsubEvents = null; }
+      window._events = [];
       showAuth();
     }
   });
 
   function subscribeEvents(uid) {
     if (unsubEvents) unsubEvents();
-    const evRef = collection(db, 'users', uid, 'events');
-    unsubEvents = onSnapshot(evRef, (snap) => {
+    const ref = collection(db, 'users', uid, 'events');
+    unsubEvents = onSnapshot(ref, (snap) => {
       const evts = [];
       snap.forEach(d => evts.push({ id: d.id, ...d.data() }));
       window._events = evts;
       if (window._renderAll) window._renderAll();
+    }, (err) => {
+      console.error('Firestore error:', err);
     });
   }
 </script>
@@ -97,15 +95,13 @@
    TOKENS
 ══════════════════════════════════════════ */
 :root {
-  --gold:       #f5c842;
-  --gold-soft:  #f7d46e;
-  --gold-dim:   rgba(245,200,66,.13);
-  --gold-glow:  rgba(245,200,66,.3);
-  --gold-border:rgba(245,200,66,.38);
-
+  --gold:        #f5c842;
+  --gold-soft:   #f7d46e;
+  --gold-dim:    rgba(245,200,66,.13);
+  --gold-glow:   rgba(245,200,66,.3);
+  --gold-border: rgba(245,200,66,.38);
   --c0:#34d9cc; --c1:#b8a0fb; --c2:#ff8f5e;
   --c3:#6ee88a; --c4:#ff6b7a; --c5:#52c5f5; --c6:#f5c842;
-
   --r:12px; --rl:18px; --rx:26px;
   --ease:cubic-bezier(.4,0,.2,1);
   --spring:cubic-bezier(.34,1.56,.64,1);
@@ -113,7 +109,6 @@
   --sb:env(safe-area-inset-bottom,0px);
   --sl:env(safe-area-inset-left,0px);
 }
-
 [data-theme="dark"] {
   --page:#0f1117; --page2:#080a0f;
   --s1:#181c28; --s2:#1e2436; --s3:#252e44; --s4:#2e3850;
@@ -149,6 +144,27 @@ body::before{
   top:-300px;left:-300px;pointer-events:none;z-index:0;
 }
 
+/* Loading screen shown before Firebase resolves */
+#loadScreen{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--page);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;
+  transition:opacity .4s;
+}
+#loadScreen.hidden{opacity:0;pointer-events:none}
+.load-gem{
+  width:52px;height:52px;border-radius:16px;
+  background:linear-gradient(135deg,var(--gold),#d49a18);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 1px rgba(255,255,255,.12),0 8px 28px var(--gold-glow);
+  animation:gemPulse 1.8s ease-in-out infinite;
+}
+.load-gem svg{width:26px;height:26px}
+@keyframes gemPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.load-txt{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;
+  color:var(--t1);letter-spacing:-.03em}
+.load-sub{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--t3);letter-spacing:.1em}
+
 /* ══════════════════════════════════════════
    SCREEN SWITCHING
 ══════════════════════════════════════════ */
@@ -157,7 +173,7 @@ body::before{
 #appScreen.visible{display:block}
 
 /* ══════════════════════════════════════════
-   ━━━ AUTH SCREEN ━━━
+   AUTH SCREEN
 ══════════════════════════════════════════ */
 #authScreen{
   min-height:100vh;width:100%;
@@ -166,12 +182,9 @@ body::before{
   padding-top:calc(var(--st) + 1.5rem);
   padding-bottom:calc(var(--sb) + 1.5rem);
 }
-
 .auth-card{
   width:100%;max-width:420px;
-  background:var(--s1);
-  border:1px solid var(--b2);
-  border-radius:var(--rx);
+  background:var(--s1);border:1px solid var(--b2);border-radius:var(--rx);
   padding:2.2rem 2rem 2rem;
   box-shadow:0 24px 64px rgba(0,0,0,.3);
   animation:authRise .45s var(--spring) both;
@@ -180,8 +193,6 @@ body::before{
   from{opacity:0;transform:translateY(28px) scale(.96)}
   to{opacity:1;transform:translateY(0) scale(1)}
 }
-
-/* logo in auth */
 .auth-logo{display:flex;align-items:center;justify-content:center;gap:.7rem;margin-bottom:1.8rem}
 .auth-gem{
   width:44px;height:44px;border-radius:14px;flex-shrink:0;
@@ -193,7 +204,6 @@ body::before{
 .auth-gem::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;
   background:rgba(255,255,255,.2);border-radius:14px 14px 50% 50%}
 .auth-gem svg{width:22px;height:22px;position:relative;z-index:1}
-.auth-brand{text-align:left}
 .auth-brand-name{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:800;
   color:var(--t1);letter-spacing:-.03em;line-height:1}
 .auth-brand-tag{font-family:'DM Mono',monospace;font-size:.58rem;
@@ -209,19 +219,18 @@ body::before{
 }
 .auth-tab.active{background:var(--s1);color:var(--t1);box-shadow:0 1px 6px rgba(0,0,0,.18)}
 
-/* social buttons */
+/* social */
 .social-btns{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.2rem}
 .social-btn{
   display:flex;align-items:center;gap:.85rem;
   background:var(--s2);border:1.5px solid var(--b2);border-radius:var(--r);
   padding:.72rem 1rem;cursor:pointer;
-  font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;
-  color:var(--t1);transition:background .18s,border-color .18s,transform .15s;
-  width:100%;text-align:left;
+  font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;color:var(--t1);
+  transition:background .18s,border-color .18s,transform .15s;width:100%;text-align:left;
 }
 .social-btn:hover{background:var(--s3);border-color:var(--b3);transform:translateY(-1px)}
 .social-btn:active{transform:scale(.98)}
-.social-btn svg,.social-btn img{width:20px;height:20px;flex-shrink:0}
+.social-btn svg{width:20px;height:20px;flex-shrink:0}
 .social-btn.google{border-color:rgba(66,133,244,.3)}
 .social-btn.facebook{border-color:rgba(24,119,242,.3)}
 .social-btn.apple{border-color:var(--b3)}
@@ -231,7 +240,7 @@ body::before{
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--b2)}
 .auth-divider span{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--t4);letter-spacing:.1em;white-space:nowrap}
 
-/* form fields */
+/* fields */
 .afield{margin-bottom:.85rem}
 .aflabel{display:block;font-family:'DM Mono',monospace;font-size:.6rem;
   text-transform:uppercase;letter-spacing:.14em;color:var(--t3);margin-bottom:.4rem}
@@ -243,33 +252,29 @@ body::before{
 }
 .afinput:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
 .afinput::placeholder{color:var(--t4)}
+.name-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.85rem}
 
-.name-row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
-
-/* auth submit */
+/* submit */
 .auth-submit{
   width:100%;background:linear-gradient(135deg,var(--gold),#e09c15);
   border:none;border-radius:var(--r);color:#0e0c00;
   font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;
   padding:.82rem;cursor:pointer;margin-top:.3rem;
   box-shadow:0 4px 20px var(--gold-glow);
-  transition:opacity .2s,transform .15s;
-  letter-spacing:.01em;
+  transition:opacity .2s,transform .15s;letter-spacing:.01em;
 }
 .auth-submit:hover{opacity:.9;transform:translateY(-1px)}
 .auth-submit:active{transform:scale(.97)}
 .auth-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
-/* password reset */
 .forgot-link{
   display:block;text-align:right;margin-top:.4rem;margin-bottom:.2rem;
   font-family:'DM Mono',monospace;font-size:.62rem;
-  color:var(--t3);cursor:pointer;text-decoration:underline;
-  transition:color .15s;
+  color:var(--t3);cursor:pointer;text-decoration:underline;transition:color .15s;
 }
 .forgot-link:hover{color:var(--gold)}
 
-/* error message */
+/* messages */
 .auth-error{
   background:rgba(255,107,122,.1);border:1px solid rgba(255,107,122,.3);
   border-radius:var(--r);padding:.65rem .9rem;margin-bottom:.9rem;
@@ -285,29 +290,27 @@ body::before{
 }
 .auth-success.show{display:block}
 
-/* loading spinner */
-.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);
-  border-top-color:#0e0c00;border-radius:50%;animation:spin .7s linear infinite;margin-right:.4rem}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.25);
+  border-top-color:#0e0c00;border-radius:50%;animation:spin .7s linear infinite;margin-right:.4rem;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* note re: Facebook/Apple */
 .auth-note{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--t4);
-  text-align:center;line-height:1.6;margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--b1)}
-.auth-note a{color:var(--t3);text-decoration:underline}
+  text-align:center;line-height:1.7;margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--b1)}
 
 /* ══════════════════════════════════════════
-   ━━━ APP SCREEN ━━━
+   APP SCREEN
 ══════════════════════════════════════════ */
 .shell{
   position:relative;z-index:1;max-width:940px;margin:0 auto;
   padding:0 max(1.1rem,var(--sl));padding-top:calc(var(--st) + .6rem);
 }
 
-/* ── HEADER ── */
+/* header */
 header{
   display:flex;align-items:center;justify-content:space-between;
   padding:1.1rem 0 1rem;gap:.8rem;
   border-bottom:1px solid var(--b1);margin-bottom:1.4rem;
+  flex-wrap:wrap;
 }
 .logo{display:flex;align-items:center;gap:.65rem}
 .logo-gem{
@@ -319,84 +322,79 @@ header{
 .logo-gem::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;
   background:rgba(255,255,255,.18);border-radius:11px 11px 50% 50%}
 .logo-gem svg{width:18px;height:18px;position:relative;z-index:1}
-.logo-words{}
 .logo-name{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:800;
   color:var(--t1);letter-spacing:-.03em;line-height:1}
 .logo-tag{font-family:'DM Mono',monospace;font-size:.53rem;color:var(--t3);
   letter-spacing:.12em;text-transform:uppercase;display:block;margin-top:1px}
-
 .hdr-right{display:flex;align-items:center;gap:.55rem}
 
-/* user avatar */
+/* user pill */
 .user-pill{
-  display:flex;align-items:center;gap:.55rem;
+  display:flex;align-items:center;gap:.5rem;
   background:var(--s2);border:1px solid var(--b2);
-  border-radius:50px;padding:.32rem .75rem .32rem .32rem;
-  cursor:pointer;transition:background .18s,border-color .18s;
-  position:relative;
+  border-radius:50px;padding:.3rem .72rem .3rem .3rem;
+  cursor:pointer;transition:background .18s,border-color .18s;position:relative;
 }
 .user-pill:hover{background:var(--s3);border-color:var(--b3)}
 .user-avatar{
-  width:28px;height:28px;border-radius:50%;object-fit:cover;
+  width:28px;height:28px;border-radius:50%;
   background:var(--gold);display:flex;align-items:center;justify-content:center;
-  font-size:.78rem;font-weight:700;color:#0e0c00;flex-shrink:0;
-  overflow:hidden;
+  font-size:.78rem;font-weight:700;color:#0e0c00;flex-shrink:0;overflow:hidden;
 }
 .user-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .user-name{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--t2);
-  white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis}
+  white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}
 
-/* user dropdown */
+/* dropdown */
 .user-drop{
-  position:absolute;top:calc(100% + .5rem);right:0;min-width:180px;
+  position:absolute;top:calc(100% + .5rem);right:0;min-width:188px;
   background:var(--s1);border:1px solid var(--b2);border-radius:var(--rl);
-  padding:.5rem;box-shadow:0 12px 40px rgba(0,0,0,.3);z-index:100;
+  padding:.5rem;box-shadow:0 12px 40px rgba(0,0,0,.28);z-index:200;
   display:none;animation:dropIn .2s var(--spring);
 }
 .user-drop.open{display:block}
 @keyframes dropIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.drop-email{padding:.4rem .75rem;font-family:'DM Mono',monospace;
+  font-size:.58rem;color:var(--t4);letter-spacing:.04em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drop-divider{height:1px;background:var(--b1);margin:.3rem 0}
 .drop-item{
   display:flex;align-items:center;gap:.65rem;
-  padding:.6rem .75rem;border-radius:9px;cursor:pointer;
+  padding:.58rem .75rem;border-radius:9px;cursor:pointer;
   font-size:.84rem;color:var(--t2);transition:background .15s,color .15s;
   border:none;background:transparent;width:100%;text-align:left;
 }
 .drop-item:hover{background:var(--s3);color:var(--t1)}
 .drop-item.danger:hover{background:rgba(255,107,122,.1);color:var(--danger)}
 .drop-item svg{width:15px;height:15px;flex-shrink:0;opacity:.7}
-.drop-divider{height:1px;background:var(--b1);margin:.35rem 0}
-.drop-email{padding:.4rem .75rem;font-family:'DM Mono',monospace;
-  font-size:.6rem;color:var(--t4);letter-spacing:.04em}
 
 .clock-wrap{text-align:right}
-.clock-big{font-family:'DM Mono',monospace;font-size:clamp(1.1rem,4vw,1.7rem);
+.clock-big{font-family:'DM Mono',monospace;font-size:clamp(1.05rem,4vw,1.65rem);
   font-weight:500;color:var(--gold);letter-spacing:-.04em;line-height:1}
-.clock-small{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3);
+.clock-small{font-family:'DM Mono',monospace;font-size:.57rem;color:var(--t3);
   letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
-
 .ibtn{width:38px;height:38px;border-radius:11px;background:var(--s2);border:1px solid var(--b1);
   color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;
   font-size:1rem;transition:background .2s,border-color .2s,transform .15s;flex-shrink:0}
 .ibtn:hover{background:var(--s3);border-color:var(--b2)}
 .ibtn:active{transform:scale(.92)}
 
-/* ── HERO STRIP ── */
+/* hero strip */
 .hero{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-bottom:1.4rem}
 .hcard{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);
-  padding:1rem 1.1rem;position:relative;overflow:hidden;
-  transition:background .25s,border-color .25s}
+  padding:1rem 1.1rem;position:relative;overflow:hidden;transition:background .25s,border-color .25s}
 .hcard::before{content:'';position:absolute;top:0;right:0;width:70px;height:70px;
   border-radius:0 var(--rl) 0 70px;background:var(--b1);pointer-events:none}
 .hcard.gold{background:linear-gradient(135deg,rgba(245,200,66,.15),rgba(245,200,66,.04));
   border-color:var(--gold-border)}
 .hc-lbl{font-family:'DM Mono',monospace;font-size:.56rem;text-transform:uppercase;
   letter-spacing:.14em;color:var(--t3);margin-bottom:.5rem}
-.hc-val{font-family:'Fraunces',serif;font-size:clamp(1.1rem,3.5vw,1.75rem);
+.hc-val{font-family:'Fraunces',serif;font-size:clamp(1.05rem,3.5vw,1.7rem);
   font-weight:700;color:var(--t1);letter-spacing:-.03em;line-height:1.05}
 .hc-val.am{color:var(--gold)}
-.hc-sub{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--t3);margin-top:4px;line-height:1.4}
+.hc-sub{font-family:'DM Mono',monospace;font-size:.57rem;color:var(--t3);margin-top:4px;line-height:1.4}
 
-/* ── DAY TABS ── */
+/* day tabs */
 .day-tabs{display:flex;gap:.4rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
   scrollbar-width:none;padding-bottom:2px;margin-bottom:1.1rem}
 .day-tabs::-webkit-scrollbar{display:none}
@@ -409,12 +407,20 @@ header{
 .day-tab.has-ev{color:var(--t2);border-color:var(--b2)}
 .day-tab.past-d{opacity:.55}
 
-/* ── SECTION ROW ── */
+/* section */
 .sec-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
 .sec-lbl{font-family:'DM Mono',monospace;font-size:.62rem;font-weight:500;
   text-transform:uppercase;letter-spacing:.18em;color:var(--t3)}
 
-/* ── TIMELINE ── */
+/* sync pill */
+.sync-pill{display:inline-flex;align-items:center;gap:.4rem;
+  font-family:'DM Mono',monospace;font-size:.6rem;color:var(--t3);opacity:0;transition:opacity .3s}
+.sync-pill.show{opacity:1}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--c3)}
+@keyframes syncpulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sync-pill.saving .sync-dot{background:var(--gold);animation:syncpulse .8s ease-in-out infinite}
+
+/* timeline */
 .tl-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);
   padding:1.2rem 1.3rem 1.9rem;margin-bottom:1.4rem;position:relative;overflow:hidden}
 .tl-card::before{content:'';position:absolute;inset:0;
@@ -431,11 +437,12 @@ header{
 .seg{position:absolute;top:0;height:100%;border-radius:8px;display:flex;
   align-items:center;justify-content:center;overflow:hidden;transition:filter .2s,transform .2s;cursor:default}
 .seg:hover{filter:brightness(1.2);transform:scaleY(1.05)}
-.seg-stripe{position:absolute;inset:0;opacity:.07;background-image:repeating-linear-gradient(-55deg,rgba(255,255,255,.8) 0,rgba(255,255,255,.8) 2px,transparent 2px,transparent 8px)}
+.seg-stripe{position:absolute;inset:0;opacity:.07;
+  background-image:repeating-linear-gradient(-55deg,rgba(255,255,255,.8) 0,rgba(255,255,255,.8) 2px,transparent 2px,transparent 8px)}
 .seg-txt{font-family:'DM Mono',monospace;font-size:.57rem;font-weight:500;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 7px;
   position:relative;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,.3)}
-[data-theme="dark"] .seg-txt{color:rgba(255,255,255,.95)}
+[data-theme="dark"]  .seg-txt{color:rgba(255,255,255,.95)}
 [data-theme="light"] .seg-txt{color:rgba(0,0,0,.8)}
 .needle{position:absolute;top:-11px;bottom:-11px;width:2px;
   background:linear-gradient(to bottom,transparent,var(--gold) 15%,var(--gold) 85%,transparent);
@@ -456,7 +463,7 @@ header{
 .pin-lbl{font-family:'DM Mono',monospace;font-size:.51rem;text-align:center;
   white-space:nowrap;margin-top:2px;font-weight:500}
 
-/* ── EVENT CARDS ── */
+/* event grid */
 .eg{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,188px),1fr));
   gap:.7rem;margin-bottom:1.3rem}
 .ecard{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);
@@ -479,8 +486,7 @@ header{
 .card-emoji{font-size:1.35rem;margin-bottom:.45rem;display:block;line-height:1}
 .card-name{font-size:.9rem;font-weight:600;color:var(--t1);margin-bottom:.1rem;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:1rem;line-height:1.2}
-.card-when{font-family:'DM Mono',monospace;font-size:.72rem;font-weight:400;
-  color:var(--t2);margin-bottom:.65rem;line-height:1.3}
+.card-when{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--t2);margin-bottom:.65rem;line-height:1.3}
 .card-cd{font-family:'Fraunces',serif;font-size:clamp(1.1rem,3.8vw,1.4rem);
   font-weight:700;letter-spacing:-.03em;line-height:1}
 .card-cd-lbl{font-family:'DM Mono',monospace;font-size:.54rem;color:var(--t3);
@@ -494,28 +500,25 @@ header{
 .cact:hover{color:var(--t1);background:var(--s4)}
 .cact.del:hover{color:var(--danger)}
 .cact.alm{color:var(--gold)}
-.ecard.is-next .cacts{right:4.8rem}
-.ecard.is-next .date-pill{right:4.8rem}
+.ecard.is-next .cacts,.ecard.is-next .date-pill{right:4.8rem}
 
-/* empty */
 .empty-s{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;
   padding:2.5rem 1rem;gap:.65rem;color:var(--t3)}
 .empty-s .ei{font-size:2.3rem;opacity:.4}
-.empty-s p{font-family:'DM Mono',monospace;font-size:.7rem;text-align:center;
-  line-height:1.9;color:var(--t3)}
+.empty-s p{font-family:'DM Mono',monospace;font-size:.7rem;text-align:center;line-height:1.9}
 
-/* ── FAB ── */
+/* fab */
 .fab-row{display:flex;justify-content:center;padding:.6rem 0 .8rem}
 .fab{display:flex;align-items:center;gap:.6rem;background:var(--gold);color:#0e0c00;
   font-family:'DM Sans',sans-serif;font-weight:600;font-size:.88rem;
   border:none;border-radius:50px;padding:.82rem 2rem;cursor:pointer;
-  box-shadow:0 4px 24px var(--gold-glow),0 0 0 1px rgba(255,255,255,.1) inset;
-  transition:opacity .2s,transform .18s,box-shadow .2s;touch-action:manipulation;letter-spacing:.01em}
+  box-shadow:0 4px 24px var(--gold-glow),inset 0 0 0 1px rgba(255,255,255,.1);
+  transition:opacity .2s,transform .18s,box-shadow .2s;touch-action:manipulation}
 .fab:hover{opacity:.92;transform:translateY(-2px);box-shadow:0 10px 32px var(--gold-glow)}
 .fab:active{transform:scale(.96)}
 .fab svg{width:16px;height:16px;flex-shrink:0}
 
-/* ── MODAL ── */
+/* modal */
 .overlay{position:fixed;inset:0;z-index:1000;background:var(--ov);
   backdrop-filter:blur(16px) saturate(1.6);-webkit-backdrop-filter:blur(16px) saturate(1.6);
   display:flex;align-items:flex-end;justify-content:center;
@@ -532,8 +535,7 @@ header{
 @media(min-width:540px){.mhandle{display:none}}
 .mhdr{display:flex;align-items:flex-start;justify-content:space-between;
   margin-bottom:1.3rem;padding-top:.8rem}
-.mtitle{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;
-  color:var(--t1);letter-spacing:-.03em}
+.mtitle{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;color:var(--t1);letter-spacing:-.03em}
 .msub{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--t3);margin-top:3px}
 .mclose{width:30px;height:30px;border-radius:8px;background:var(--s3);border:1px solid var(--b2);
   color:var(--t3);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -578,21 +580,20 @@ header{
 .mcta{display:flex;gap:.65rem;margin-top:1.4rem}
 .btn-go{flex:1;background:linear-gradient(135deg,var(--gold),#e09c15);border:none;border-radius:var(--r);
   color:#0e0c00;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.9rem;padding:.82rem;
-  cursor:pointer;box-shadow:0 4px 16px var(--gold-glow);transition:opacity .2s,transform .15s;letter-spacing:.01em}
+  cursor:pointer;box-shadow:0 4px 16px var(--gold-glow);transition:opacity .2s,transform .15s}
 .btn-go:hover{opacity:.9;transform:translateY(-1px)}
-.btn-go:active{transform:scale(.97)}
+.btn-go:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-no{background:var(--s3);border:1.5px solid var(--b2);border-radius:var(--r);
-  color:var(--t2);font-family:'DM Sans',sans-serif;font-size:.9rem;padding:.82rem 1.2rem;
-  cursor:pointer;transition:background .15s}
+  color:var(--t2);font-family:'DM Sans',sans-serif;font-size:.9rem;padding:.82rem 1.2rem;cursor:pointer;transition:background .15s}
 .btn-no:hover{background:var(--s4)}
 
-/* ── ALARM TOAST ── */
+/* toast */
 .toast{position:fixed;top:max(1rem,calc(var(--st) + 1rem));left:50%;
   transform:translateX(-50%) translateY(-160px);z-index:2000;
   background:linear-gradient(135deg,var(--gold),#e09c15);color:#0e0c00;
   border-radius:var(--rl);padding:1rem 1.3rem;display:flex;align-items:center;gap:1rem;
   min-width:280px;max-width:92vw;
-  box-shadow:0 12px 40px var(--gold-glow),0 0 0 1px rgba(255,255,255,.2) inset;
+  box-shadow:0 12px 40px var(--gold-glow),inset 0 0 0 1px rgba(255,255,255,.2);
   transition:transform .44s var(--spring)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .t-icon{font-size:1.8rem;line-height:1;flex-shrink:0}
@@ -602,24 +603,15 @@ header{
 .t-dis{background:rgba(0,0,0,.18);border:none;border-radius:8px;color:#0e0c00;
   font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700;padding:.38rem .75rem;cursor:pointer;flex-shrink:0}
 
-/* ── SAVING INDICATOR ── */
-.sync-pill{
-  display:inline-flex;align-items:center;gap:.4rem;
-  font-family:'DM Mono',monospace;font-size:.6rem;color:var(--t3);
-  opacity:0;transition:opacity .3s;
-}
-.sync-pill.show{opacity:1}
-.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--c3)}
-@keyframes syncpulse{0%,100%{opacity:1}50%{opacity:.3}}
-.sync-pill.saving .sync-dot{background:var(--gold);animation:syncpulse .8s ease-in-out infinite}
-
-/* ── RESPONSIVE ── */
+/* responsive */
 @media(max-width:420px){
   .hero{grid-template-columns:1fr 1fr}
   .hcard:nth-child(3){grid-column:1/-1}
   .dt-row{grid-template-columns:1fr}
   .eg{grid-template-columns:1fr 1fr}
   .name-row{grid-template-columns:1fr}
+  .clock-big{font-size:1rem}
+  .user-name{display:none}
 }
 @media(min-width:700px){
   .shell{padding:0 2rem;padding-top:calc(var(--st) + .6rem)}
@@ -627,104 +619,113 @@ header{
 }
 @media(min-width:900px){.eg{grid-template-columns:repeat(4,1fr)}}
 </style>
+
 </head>
 <body>
+
+<!-- LOADING SCREEN -->
+
+<div id="loadScreen">
+  <div class="load-gem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#0e0c00" stroke-width="2.3" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 12"/>
+    </svg>
+  </div>
+  <div class="load-txt">TimeSpace</div>
+  <div class="load-sub">Loading your day…</div>
+</div>
 
 <!-- ══════════════════════════════════════
      AUTH SCREEN
 ══════════════════════════════════════ -->
+
 <div id="authScreen">
   <div class="auth-card">
-
-    <!-- Logo -->
     <div class="auth-logo">
       <div class="auth-gem">
         <svg viewBox="0 0 24 24" fill="none" stroke="#0e0c00" stroke-width="2.3" stroke-linecap="round">
           <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 12"/>
         </svg>
       </div>
-      <div class="auth-brand">
+      <div>
         <div class="auth-brand-name">TimeSpace</div>
         <div class="auth-brand-tag">Your personal day planner</div>
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
-      <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Create Account</button>
+```
+<div class="auth-tabs">
+  <button class="auth-tab active" id="tabLogin"  onclick="switchTab('login')">Sign In</button>
+  <button class="auth-tab"        id="tabSignup" onclick="switchTab('signup')">Create Account</button>
+</div>
+
+<div class="auth-error"   id="authError"></div>
+<div class="auth-success" id="authSuccess"></div>
+
+<!-- Social -->
+<div class="social-btns">
+  <button class="social-btn google" onclick="signInGoogle()">
+    <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    Continue with Google
+  </button>
+  <button class="social-btn facebook" onclick="signInFacebook()">
+    <svg viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+    Continue with Facebook
+  </button>
+  <button class="social-btn apple" onclick="signInApple()">
+    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.54 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z"/></svg>
+    Continue with Apple
+  </button>
+</div>
+
+<div class="auth-divider"><span>or with email</span></div>
+
+<!-- LOGIN -->
+<div id="loginForm">
+  <div class="afield">
+    <label class="aflabel" for="loginEmail">Email</label>
+    <input class="afinput" id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
+  </div>
+  <div class="afield">
+    <label class="aflabel" for="loginPass">Password</label>
+    <input class="afinput" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+    <span class="forgot-link" onclick="sendReset()">Forgot password?</span>
+  </div>
+  <button class="auth-submit" id="loginBtn" onclick="emailLogin()">Sign In</button>
+</div>
+
+<!-- SIGNUP -->
+<div id="signupForm" style="display:none">
+  <div class="name-row">
+    <div>
+      <label class="aflabel" for="signFirst">First Name</label>
+      <input class="afinput" id="signFirst" type="text" placeholder="Your name" autocomplete="given-name"/>
     </div>
-
-    <!-- Error / success -->
-    <div class="auth-error" id="authError"></div>
-    <div class="auth-success" id="authSuccess"></div>
-
-    <!-- Social buttons -->
-    <div class="social-btns">
-      <button class="social-btn google" onclick="signInGoogle()">
-        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Continue with Google
-      </button>
-      <button class="social-btn facebook" onclick="signInFacebook()">
-        <svg viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-        Continue with Facebook
-      </button>
-      <button class="social-btn apple" onclick="signInApple()">
-        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.54 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z"/></svg>
-        Continue with Apple
-      </button>
+    <div>
+      <label class="aflabel" for="signLast">Last Name</label>
+      <input class="afinput" id="signLast" type="text" placeholder="Optional"/>
     </div>
+  </div>
+  <div class="afield">
+    <label class="aflabel" for="signEmail">Email</label>
+    <input class="afinput" id="signEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
+  </div>
+  <div class="afield">
+    <label class="aflabel" for="signPass">Password</label>
+    <input class="afinput" id="signPass" type="password" placeholder="Min 6 characters" autocomplete="new-password"/>
+  </div>
+  <div class="afield">
+    <label class="aflabel" for="signPass2">Confirm Password</label>
+    <input class="afinput" id="signPass2" type="password" placeholder="Repeat password" autocomplete="new-password"/>
+  </div>
+  <button class="auth-submit" id="signupBtn" onclick="emailSignup()">Create Account</button>
+</div>
 
-    <!-- Email divider -->
-    <div class="auth-divider"><span>or with email</span></div>
-
-    <!-- LOGIN FORM -->
-    <div id="loginForm">
-      <div class="afield">
-        <label class="aflabel" for="loginEmail">Email</label>
-        <input class="afinput" id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
-      </div>
-      <div class="afield">
-        <label class="aflabel" for="loginPass">Password</label>
-        <input class="afinput" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"/>
-        <span class="forgot-link" onclick="sendReset()">Forgot password?</span>
-      </div>
-      <button class="auth-submit" id="loginBtn" onclick="emailLogin()">Sign In</button>
-    </div>
-
-    <!-- SIGNUP FORM -->
-    <div id="signupForm" style="display:none">
-      <div class="name-row" style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.85rem">
-        <div>
-          <label class="aflabel" for="signFirst">First Name</label>
-          <input class="afinput" id="signFirst" type="text" placeholder="Mk" autocomplete="given-name"/>
-        </div>
-        <div>
-          <label class="aflabel" for="signLast">Last Name</label>
-          <input class="afinput" id="signLast" type="text" placeholder="Optional"/>
-        </div>
-      </div>
-      <div class="afield">
-        <label class="aflabel" for="signEmail">Email</label>
-        <input class="afinput" id="signEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
-      </div>
-      <div class="afield">
-        <label class="aflabel" for="signPass">Password</label>
-        <input class="afinput" id="signPass" type="password" placeholder="Min 6 characters" autocomplete="new-password"/>
-      </div>
-      <div class="afield">
-        <label class="aflabel" for="signPass2">Confirm Password</label>
-        <input class="afinput" id="signPass2" type="password" placeholder="Repeat password" autocomplete="new-password"/>
-      </div>
-      <button class="auth-submit" id="signupBtn" onclick="emailSignup()">Create Account</button>
-    </div>
-
-    <div class="auth-note">
-      Facebook login requires a Facebook App ID configured in Firebase.<br>
-      Apple Sign-In requires an Apple Developer account.
-      <br><br>
-      Your events are private and encrypted — only you can see them.
-    </div>
+<div class="auth-note">
+  Facebook &amp; Apple require extra setup in Firebase console.<br>
+  Google &amp; Email work out of the box after enabling in Firebase Auth.
+</div>
+```
 
   </div>
 </div>
@@ -732,9 +733,9 @@ header{
 <!-- ══════════════════════════════════════
      APP SCREEN
 ══════════════════════════════════════ -->
+
 <div id="appScreen">
 
-  <!-- ALARM TOAST -->
   <div class="toast" id="toast">
     <div class="t-icon" id="tIcon">⏰</div>
     <div class="t-body">
@@ -745,7 +746,6 @@ header{
   </div>
 
   <div class="shell">
-    <!-- HEADER -->
     <header>
       <div class="logo">
         <div class="logo-gem">
@@ -753,34 +753,35 @@ header{
             <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 12"/>
           </svg>
         </div>
-        <div class="logo-words">
+        <div>
           <div class="logo-name">TimeSpace</div>
           <span class="logo-tag">day planner</span>
         </div>
       </div>
-
       <div class="hdr-right">
         <button class="ibtn" id="themeBtn">🌙</button>
-
-        <!-- User pill -->
         <div class="user-pill" id="userPill" onclick="toggleDrop()">
           <div class="user-avatar" id="userAvatar">?</div>
           <span class="user-name" id="userName">…</span>
-          <!-- dropdown -->
           <div class="user-drop" id="userDrop">
             <div class="drop-email" id="dropEmail">—</div>
             <div class="drop-divider"></div>
             <button class="drop-item" onclick="toggleTheme()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-              Toggle Theme
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              </svg>Toggle Theme
             </button>
             <button class="drop-item danger" onclick="doSignOut()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              Sign Out
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>Sign Out
             </button>
           </div>
         </div>
-
         <div class="clock-wrap">
           <div class="clock-big" id="ckd">--:--:--</div>
           <div class="clock-small" id="ckdt">---</div>
@@ -788,65 +789,62 @@ header{
       </div>
     </header>
 
-    <!-- HERO -->
-    <div class="hero">
-      <div class="hcard gold">
-        <div class="hc-lbl">Free until next</div>
-        <div class="hc-val am" id="hFree">—</div>
-        <div class="hc-sub" id="hFreeSub">no upcoming</div>
-      </div>
-      <div class="hcard">
-        <div class="hc-lbl">Next event</div>
-        <div class="hc-val" id="hName" style="font-size:.9rem;font-family:'DM Sans',sans-serif;font-weight:600">—</div>
-        <div class="hc-sub" id="hTime">—</div>
-      </div>
-      <div class="hcard">
-        <div class="hc-lbl">Total events</div>
-        <div class="hc-val" id="hCount">0</div>
-        <div class="hc-sub" id="hPast">0 past</div>
-      </div>
-    </div>
+```
+<div class="hero">
+  <div class="hcard gold">
+    <div class="hc-lbl">Free until next</div>
+    <div class="hc-val am" id="hFree">—</div>
+    <div class="hc-sub" id="hFreeSub">no upcoming</div>
+  </div>
+  <div class="hcard">
+    <div class="hc-lbl">Next event</div>
+    <div class="hc-val" id="hName" style="font-size:.9rem;font-family:'DM Sans',sans-serif;font-weight:600">—</div>
+    <div class="hc-sub" id="hTime">—</div>
+  </div>
+  <div class="hcard">
+    <div class="hc-lbl">Total events</div>
+    <div class="hc-val" id="hCount">0</div>
+    <div class="hc-sub" id="hPast">0 past</div>
+  </div>
+</div>
 
-    <!-- DAY TABS -->
-    <div class="day-tabs" id="dayTabs"></div>
+<div class="day-tabs" id="dayTabs"></div>
 
-    <!-- SYNC INDICATOR -->
-    <div class="sec-row">
-      <span class="sec-lbl" id="tlLabel">Timeline · Today</span>
-      <div class="sync-pill" id="syncPill"><div class="sync-dot"></div><span id="syncTxt">Synced</span></div>
-    </div>
+<div class="sec-row">
+  <span class="sec-lbl" id="tlLabel">Timeline · Today</span>
+  <div class="sync-pill" id="syncPill">
+    <div class="sync-dot"></div><span id="syncTxt">Synced</span>
+  </div>
+</div>
+<div class="tl-card">
+  <div class="ruler" id="ruler"></div>
+  <div class="tl-bar" id="tlBar"><div class="needle" id="needle"></div></div>
+</div>
 
-    <!-- TIMELINE -->
-    <div class="tl-card">
-      <div class="ruler" id="ruler"></div>
-      <div class="tl-bar" id="tlBar"><div class="needle" id="needle"></div></div>
-    </div>
+<div class="sec-row"><span class="sec-lbl" id="evLabel">Events</span></div>
+<div class="eg" id="evGrid">
+  <div class="empty-s"><div class="ei">🕐</div><p>No events yet.<br>Tap <strong style="color:var(--t2)">Add Event</strong> to begin.</p></div>
+</div>
 
-    <!-- EVENTS -->
-    <div class="sec-row">
-      <span class="sec-lbl" id="evLabel">Events</span>
-    </div>
-    <div class="eg" id="evGrid">
-      <div class="empty-s"><div class="ei">🕐</div><p>No events yet.<br>Tap <strong style="color:var(--t2)">Add Event</strong> to begin.</p></div>
-    </div>
+<div class="fab-row">
+  <button class="fab" id="openModal">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>Add Event
+  </button>
+</div>
+```
 
-    <!-- FAB -->
-    <div class="fab-row">
-      <button class="fab" id="openModal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>Add Event
-      </button>
-    </div>
   </div>
 </div>
 
 <!-- ADD EVENT MODAL -->
+
 <div class="overlay" id="overlay">
   <div class="modal" role="dialog" aria-modal="true">
     <div class="mhandle"></div>
     <div class="mhdr">
-      <div><div class="mtitle">New Event</div><div class="msub">Saved to your account</div></div>
+      <div><div class="mtitle">New Event</div><div class="msub">Saved to your account instantly</div></div>
       <button class="mclose" id="closeModal">✕</button>
     </div>
     <div class="field">
@@ -908,17 +906,15 @@ header{
 
 <script>
 /* ════════════════════════════════════════
-   CONSTANTS
+   CONSTANTS & STATE
 ════════════════════════════════════════ */
 const COLORS = ['#34d9cc','#b8a0fb','#ff8f5e','#6ee88a','#ff6b7a','#52c5f5','#f5c842'];
 const TEMO   = ['🎓','🚪','🚌','🪥','⚠️','🎯','⭐'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-/* ════════════════════════════════════════
-   STATE
-════════════════════════════════════════ */
-window._events = [];
+window._events  = [];
+window._currentUser = null;
 let selEmoji = '🎓';
 let viewDate = todayStr();
 let fired    = new Set();
@@ -928,16 +924,17 @@ let actx     = null;
    SCREEN HELPERS
 ════════════════════════════════════════ */
 function showAuth() {
+  document.getElementById('loadScreen').classList.add('hidden');
   document.getElementById('authScreen').classList.add('visible');
   document.getElementById('appScreen').classList.remove('visible');
 }
 function showApp(user) {
+  document.getElementById('loadScreen').classList.add('hidden');
   document.getElementById('authScreen').classList.remove('visible');
   document.getElementById('appScreen').classList.add('visible');
-  // populate user info
   const name = user.displayName || user.email?.split('@')[0] || 'You';
   document.getElementById('userName').textContent = name.split(' ')[0];
-  document.getElementById('dropEmail').textContent = user.email || '';
+  document.getElementById('dropEmail').textContent = user.email || 'No email';
   const av = document.getElementById('userAvatar');
   if (user.photoURL) {
     av.innerHTML = `<img src="${user.photoURL}" alt="avatar">`;
@@ -949,167 +946,119 @@ function showApp(user) {
 /* ════════════════════════════════════════
    AUTH UI
 ════════════════════════════════════════ */
-let authTab = 'login';
 function switchTab(tab) {
-  authTab = tab;
-  document.getElementById('loginForm').style.display  = tab === 'login'  ? 'block' : 'none';
-  document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
-  document.getElementById('tabLogin').classList.toggle('active',  tab === 'login');
-  document.getElementById('tabSignup').classList.toggle('active', tab === 'signup');
-  clearAuthMsg();
+  document.getElementById('loginForm').style.display  = tab==='login'  ? 'block':'none';
+  document.getElementById('signupForm').style.display = tab==='signup' ? 'block':'none';
+  document.getElementById('tabLogin').classList.toggle('active',  tab==='login');
+  document.getElementById('tabSignup').classList.toggle('active', tab==='signup');
+  clearMsg();
+}
+function showErr(m){ const e=document.getElementById('authError'); e.textContent=m; e.classList.add('show'); document.getElementById('authSuccess').classList.remove('show'); }
+function showOk(m) { const e=document.getElementById('authSuccess'); e.textContent=m; e.classList.add('show'); document.getElementById('authError').classList.remove('show'); }
+function clearMsg(){ document.getElementById('authError').classList.remove('show'); document.getElementById('authSuccess').classList.remove('show'); }
+
+function friendly(code) {
+  return ({
+    'auth/invalid-email':        'Invalid email address.',
+    'auth/user-not-found':       'No account found with that email.',
+    'auth/wrong-password':       'Incorrect password.',
+    'auth/invalid-credential':   'Incorrect email or password.',
+    'auth/email-already-in-use': 'An account with that email already exists.',
+    'auth/weak-password':        'Password must be at least 6 characters.',
+    'auth/too-many-requests':    'Too many attempts. Please try again later.',
+    'auth/popup-closed-by-user': 'Sign-in was cancelled.',
+    'auth/network-request-failed':'Network error. Check your connection.',
+    'auth/operation-not-allowed':'This sign-in method is not enabled in Firebase.',
+    'auth/account-exists-with-different-credential':'An account exists with a different sign-in method.',
+  })[code] || `Error: ${code}`;
 }
 
-function showAuthError(msg) {
-  const el = document.getElementById('authError');
-  el.textContent = msg; el.classList.add('show');
-  document.getElementById('authSuccess').classList.remove('show');
-}
-function showAuthSuccess(msg) {
-  const el = document.getElementById('authSuccess');
-  el.textContent = msg; el.classList.add('show');
-  document.getElementById('authError').classList.remove('show');
-}
-function clearAuthMsg() {
-  document.getElementById('authError').classList.remove('show');
-  document.getElementById('authSuccess').classList.remove('show');
+function setBtnLoading(id, loading, label) {
+  const b = document.getElementById(id);
+  b.disabled = loading;
+  b.innerHTML = loading ? `<span class="spin"></span>${label}` : label;
 }
 
-function setAuthLoading(id, loading, label) {
-  const btn = document.getElementById(id);
-  btn.disabled = loading;
-  btn.innerHTML = loading ? `<span class="spin"></span>Loading…` : label;
-}
-
-/* ─── map Firebase error codes to friendly messages ─── */
-function friendlyError(code) {
-  const map = {
-    'auth/invalid-email':              'That email address is invalid.',
-    'auth/user-not-found':             'No account found with that email.',
-    'auth/wrong-password':             'Incorrect password. Try again.',
-    'auth/email-already-in-use':       'An account with that email already exists.',
-    'auth/weak-password':              'Password must be at least 6 characters.',
-    'auth/too-many-requests':          'Too many attempts. Try again later.',
-    'auth/popup-closed-by-user':       'Sign-in popup was closed. Please try again.',
-    'auth/network-request-failed':     'Network error. Check your connection.',
-    'auth/operation-not-allowed':      'This sign-in method is not enabled. Check Firebase console.',
-    'auth/account-exists-with-different-credential': 'An account already exists with a different sign-in method.',
-  };
-  return map[code] || 'Something went wrong. Please try again.';
-}
-
-/* ─── Email Login ─── */
 async function emailLogin() {
-  const fb = window._fb;
+  const fb = window._fb; if(!fb){showErr('Firebase not ready yet.');return;}
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPass').value;
-  if (!email || !pass) { showAuthError('Please enter your email and password.'); return; }
-  setAuthLoading('loginBtn', true, 'Sign In');
-  try {
-    await fb.signInWithEmailAndPassword(fb.auth, email, pass);
-  } catch (e) { showAuthError(friendlyError(e.code)); }
-  setAuthLoading('loginBtn', false, 'Sign In');
+  if (!email||!pass){ showErr('Please enter your email and password.'); return; }
+  setBtnLoading('loginBtn', true, 'Signing in…');
+  try { await fb.signInWithEmailAndPassword(fb.auth, email, pass); }
+  catch(e){ showErr(friendly(e.code)); }
+  setBtnLoading('loginBtn', false, 'Sign In');
 }
 
-/* ─── Email Signup ─── */
 async function emailSignup() {
-  const fb    = window._fb;
+  const fb = window._fb; if(!fb){showErr('Firebase not ready yet.');return;}
   const first = document.getElementById('signFirst').value.trim();
-  const last  = document.getElementById('signLast').value.trim();
   const email = document.getElementById('signEmail').value.trim();
   const pass  = document.getElementById('signPass').value;
   const pass2 = document.getElementById('signPass2').value;
-  if (!first)        { showAuthError('Please enter your first name.'); return; }
-  if (!email)        { showAuthError('Please enter your email.'); return; }
-  if (pass !== pass2){ showAuthError('Passwords do not match.'); return; }
-  if (pass.length < 6){ showAuthError('Password must be at least 6 characters.'); return; }
-  setAuthLoading('signupBtn', true, 'Create Account');
+  if (!first){ showErr('Please enter your first name.'); return; }
+  if (!email){ showErr('Please enter your email.'); return; }
+  if (pass!==pass2){ showErr('Passwords do not match.'); return; }
+  if (pass.length<6){ showErr('Password must be at least 6 characters.'); return; }
+  const last = document.getElementById('signLast').value.trim();
+  setBtnLoading('signupBtn', true, 'Creating account…');
   try {
     const cred = await fb.createUserWithEmailAndPassword(fb.auth, email, pass);
-    const displayName = last ? `${first} ${last}` : first;
-    await fb.updateProfile(cred.user, { displayName });
-  } catch(e) { showAuthError(friendlyError(e.code)); }
-  setAuthLoading('signupBtn', false, 'Create Account');
+    await fb.updateProfile(cred.user, { displayName: last ? `${first} ${last}` : first });
+  } catch(e){ showErr(friendly(e.code)); }
+  setBtnLoading('signupBtn', false, 'Create Account');
 }
 
-/* ─── Google ─── */
-async function signInGoogle() {
-  const fb = window._fb;
-  try { await fb.signInWithPopup(fb.auth, fb.googleProvider); }
-  catch(e) { if (e.code !== 'auth/popup-closed-by-user') showAuthError(friendlyError(e.code)); }
-}
+async function signInGoogle()   { const fb=window._fb; try{ await fb.signInWithPopup(fb.auth,fb.googleProvider); }catch(e){ if(e.code!=='auth/popup-closed-by-user') showErr(friendly(e.code)); } }
+async function signInFacebook() { const fb=window._fb; try{ await fb.signInWithPopup(fb.auth,fb.facebookProvider); }catch(e){ if(e.code!=='auth/popup-closed-by-user') showErr(friendly(e.code)); } }
+async function signInApple()    { const fb=window._fb; try{ await fb.signInWithPopup(fb.auth,fb.appleProvider); }catch(e){ if(e.code!=='auth/popup-closed-by-user') showErr(friendly(e.code)); } }
 
-/* ─── Facebook ─── */
-async function signInFacebook() {
-  const fb = window._fb;
-  try { await fb.signInWithPopup(fb.auth, fb.facebookProvider); }
-  catch(e) { if (e.code !== 'auth/popup-closed-by-user') showAuthError(friendlyError(e.code)); }
-}
-
-/* ─── Apple ─── */
-async function signInApple() {
-  const fb = window._fb;
-  try { await fb.signInWithPopup(fb.auth, fb.appleProvider); }
-  catch(e) { if (e.code !== 'auth/popup-closed-by-user') showAuthError(friendlyError(e.code)); }
-}
-
-/* ─── Password reset ─── */
 async function sendReset() {
-  const fb    = window._fb;
-  const email = document.getElementById('loginEmail').value.trim();
-  if (!email) { showAuthError('Enter your email above first.'); return; }
-  try {
-    await fb.sendPasswordResetEmail(fb.auth, email);
-    showAuthSuccess(`Password reset email sent to ${email}`);
-  } catch(e) { showAuthError(friendlyError(e.code)); }
+  const fb=window._fb;
+  const email=document.getElementById('loginEmail').value.trim();
+  if(!email){ showErr('Enter your email above first.'); return; }
+  try{ await fb.sendPasswordResetEmail(fb.auth,email); showOk(`Reset email sent to ${email}`); }
+  catch(e){ showErr(friendly(e.code)); }
 }
 
-/* ─── Sign Out ─── */
 async function doSignOut() {
+  document.getElementById('userDrop').classList.remove('open');
   await window._fb.signOut(window._fb.auth);
-  toggleDrop();
 }
 
-/* Enter key on auth forms */
-document.getElementById('loginPass').addEventListener('keydown',  e => { if(e.key==='Enter') emailLogin(); });
-document.getElementById('signPass2').addEventListener('keydown', e => { if(e.key==='Enter') emailSignup(); });
+document.getElementById('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') emailLogin(); });
+document.getElementById('signPass2').addEventListener('keydown', e=>{ if(e.key==='Enter') emailSignup(); });
 
 /* ════════════════════════════════════════
    THEME
 ════════════════════════════════════════ */
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
-  document.getElementById('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
-  document.getElementById('themeColorMeta').content = t === 'dark' ? '#0f1117' : '#faf7f0';
-  localStorage.setItem('ts_th4', t);
+  document.getElementById('themeBtn').textContent = t==='dark' ? '☀️' : '🌙';
+  document.getElementById('themeColorMeta').content = t==='dark' ? '#0f1117' : '#faf7f0';
+  localStorage.setItem('ts_th5', t);
 }
 function toggleTheme() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  applyTheme(cur === 'dark' ? 'light' : 'dark');
+  applyTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
   document.getElementById('userDrop').classList.remove('open');
 }
-{
-  const s = localStorage.getItem('ts_th4') ||
-    (window.matchMedia('(prefers-color-scheme:light)').matches ? 'light' : 'dark');
-  applyTheme(s);
-}
+applyTheme(localStorage.getItem('ts_th5') || (window.matchMedia('(prefers-color-scheme:light)').matches ? 'light' : 'dark'));
 document.getElementById('themeBtn').addEventListener('click', toggleTheme);
 
 /* ════════════════════════════════════════
    USER DROPDOWN
 ════════════════════════════════════════ */
-function toggleDrop() {
-  document.getElementById('userDrop').classList.toggle('open');
-}
+function toggleDrop() { document.getElementById('userDrop').classList.toggle('open'); }
 document.addEventListener('click', e => {
-  const pill = document.getElementById('userPill');
-  if (!pill.contains(e.target)) document.getElementById('userDrop').classList.remove('open');
+  if (!document.getElementById('userPill').contains(e.target))
+    document.getElementById('userDrop').classList.remove('open');
 });
 
 /* ════════════════════════════════════════
    CLOCK
 ════════════════════════════════════════ */
 function tickClock() {
-  const d = new Date();
+  const d=new Date();
   document.getElementById('ckd').textContent =
     d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
   document.getElementById('ckdt').textContent =
@@ -1119,168 +1068,94 @@ function tickClock() {
 /* ════════════════════════════════════════
    DATE HELPERS
 ════════════════════════════════════════ */
-function todayStr() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function offsetDate(n) {
-  const d = new Date(); d.setDate(d.getDate()+n);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function prettyDate(ds) {
-  const t=todayStr(), tm=offsetDate(1);
-  if(ds===t) return 'Today';
-  if(ds===tm) return 'Tomorrow';
-  const d=new Date(ds+'T00:00:00');
-  return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
-}
-function shortDate(ds) {
-  const t=todayStr(), tm=offsetDate(1);
-  if(ds===t) return 'Today';
-  if(ds===tm) return 'Tmr';
-  const d=new Date(ds+'T00:00:00');
-  return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
-}
-function parseDT(date,time) { return new Date(`${date}T${time}:00`); }
-function minsOf(ts) { const[h,m]=ts.split(':').map(Number); return h*60+m; }
-function fmtCD(ms) {
-  if(ms<=0) return 'Now';
-  const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;
-  if(h>=24){const d=Math.floor(h/24);return`${d}d ${h%24}h`;}
-  if(h>=1) return`${h}h ${m}m`;
-  if(m>=1) return`${m}m ${sc}s`;
-  return`${sc}s`;
-}
-function fmtAP(ts) {
-  const[h,m]=ts.split(':').map(Number);
-  return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
-}
+function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function offsetDate(n){const d=new Date();d.setDate(d.getDate()+n);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function prettyDate(ds){const t=todayStr(),tm=offsetDate(1);if(ds===t)return'Today';if(ds===tm)return'Tomorrow';const d=new Date(ds+'T00:00:00');return`${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`}
+function shortDate(ds){const t=todayStr(),tm=offsetDate(1);if(ds===t)return'Today';if(ds===tm)return'Tmr';const d=new Date(ds+'T00:00:00');return`${d.getDate()} ${MONTHS[d.getMonth()]}`}
+function parseDT(date,time){return new Date(`${date}T${time}:00`)}
+function minsOf(ts){const[h,m]=ts.split(':').map(Number);return h*60+m}
+function fmtCD(ms){if(ms<=0)return'Now';const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;if(h>=24){const d=Math.floor(h/24);return`${d}d ${h%24}h`;}if(h>=1)return`${h}h ${m}m`;if(m>=1)return`${m}m ${sc}s`;return`${sc}s`}
+function fmtAP(ts){const[h,m]=ts.split(':').map(Number);return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`}
 
 /* ════════════════════════════════════════
    FIRESTORE CRUD
 ════════════════════════════════════════ */
-async function addEvent(data) {
-  const fb  = window._fb;
-  const uid = window._currentUser?.uid;
-  if(!uid) return;
+async function addEventFS(data) {
+  const fb=window._fb,uid=window._currentUser?.uid; if(!uid)return;
   setSyncState('saving');
-  try {
-    await fb.addDoc(fb.collection(fb.db,'users',uid,'events'), data);
-    setSyncState('synced');
-  } catch(e) { console.error(e); setSyncState('error'); }
+  try{ await fb.addDoc(fb.collection(fb.db,'users',uid,'events'),data); setSyncState('synced'); }
+  catch(e){ console.error(e); setSyncState('error'); }
 }
-
-async function deleteEvent(id) {
-  const fb  = window._fb;
-  const uid = window._currentUser?.uid;
-  if(!uid) return;
+async function deleteEventFS(id) {
+  const fb=window._fb,uid=window._currentUser?.uid; if(!uid)return;
   setSyncState('saving');
-  try {
-    await fb.deleteDoc(fb.doc(fb.db,'users',uid,'events',id));
-    setSyncState('synced');
-  } catch(e) { console.error(e); setSyncState('error'); }
+  try{ await fb.deleteDoc(fb.doc(fb.db,'users',uid,'events',id)); setSyncState('synced'); }
+  catch(e){ console.error(e); setSyncState('error'); }
 }
-
-async function toggleAlarm(id, val) {
-  const fb  = window._fb;
-  const uid = window._currentUser?.uid;
-  if(!uid) return;
-  setSyncState('saving');
-  try {
-    await fb.updateDoc(fb.doc(fb.db,'users',uid,'events',id),{alarm:val});
-    setSyncState('synced');
-  } catch(e) { console.error(e); setSyncState('error'); }
+async function toggleAlarmFS(id,val) {
+  const fb=window._fb,uid=window._currentUser?.uid; if(!uid)return;
+  try{ await fb.updateDoc(fb.doc(fb.db,'users',uid,'events',id),{alarm:val}); }
+  catch(e){ console.error(e); }
 }
 
 /* ════════════════════════════════════════
    SYNC INDICATOR
 ════════════════════════════════════════ */
-let syncTimer = null;
-function setSyncState(state) {
-  const pill = document.getElementById('syncPill');
-  const dot  = pill.querySelector('.sync-dot');
-  const txt  = document.getElementById('syncTxt');
-  clearTimeout(syncTimer);
-  pill.classList.add('show');
-  if(state==='saving'){
-    pill.classList.add('saving');
-    txt.textContent='Saving…';
-    dot.style.background='var(--gold)';
-  } else if(state==='synced'){
-    pill.classList.remove('saving');
-    txt.textContent='Synced ✓';
-    dot.style.background='var(--c3)';
-    syncTimer=setTimeout(()=>pill.classList.remove('show'),3000);
-  } else {
-    pill.classList.remove('saving');
-    txt.textContent='Sync error';
-    dot.style.background='var(--danger)';
-  }
+let syncTmr=null;
+function setSyncState(s){
+  const pill=document.getElementById('syncPill'),dot=pill.querySelector('.sync-dot'),txt=document.getElementById('syncTxt');
+  clearTimeout(syncTmr);pill.classList.add('show');
+  if(s==='saving'){pill.classList.add('saving');txt.textContent='Saving…';dot.style.background='var(--gold)';}
+  else if(s==='synced'){pill.classList.remove('saving');txt.textContent='Synced ✓';dot.style.background='var(--c3)';syncTmr=setTimeout(()=>pill.classList.remove('show'),3000);}
+  else{pill.classList.remove('saving');txt.textContent='Sync error';dot.style.background='var(--danger)';}
 }
 
 /* ════════════════════════════════════════
    DAY TABS
 ════════════════════════════════════════ */
-function buildDayTabs() {
-  const container = document.getElementById('dayTabs');
-  const today=todayStr(), tmr=offsetDate(1);
-  const dateSet = new Set([today,tmr]);
-  window._events.forEach(e=>dateSet.add(e.date));
-  const dates = Array.from(dateSet).sort();
-  container.innerHTML='';
-  dates.forEach(ds=>{
-    const tab=document.createElement('button');
-    tab.className='day-tab';
-    const hasEv=window._events.some(e=>e.date===ds);
-    if(hasEv) tab.classList.add('has-ev');
-    if(ds<today) tab.classList.add('past-d');
-    if(ds===viewDate) tab.classList.add('active');
-    tab.textContent=prettyDate(ds);
-    tab.addEventListener('click',()=>{viewDate=ds;renderAll();});
-    container.appendChild(tab);
+function buildDayTabs(){
+  const c=document.getElementById('dayTabs'),today=todayStr(),tmr=offsetDate(1);
+  const ds=new Set([today,tmr]);window._events.forEach(e=>ds.add(e.date));
+  const dates=Array.from(ds).sort();c.innerHTML='';
+  dates.forEach(d=>{
+    const tab=document.createElement('button');tab.className='day-tab';
+    if(window._events.some(e=>e.date===d))tab.classList.add('has-ev');
+    if(d<today)tab.classList.add('past-d');
+    if(d===viewDate)tab.classList.add('active');
+    tab.textContent=prettyDate(d);
+    tab.addEventListener('click',()=>{viewDate=d;renderAll();});
+    c.appendChild(tab);
   });
 }
 
 /* ════════════════════════════════════════
    TIMELINE
 ════════════════════════════════════════ */
-function getRange(dayEv) {
+function getRange(dayEv){
   const isToday=viewDate===todayStr();
   const nm=isToday?(new Date().getHours()*60+new Date().getMinutes()+new Date().getSeconds()/60):null;
   if(!dayEv.length){const base=nm||9*60;return{start:Math.max(0,base-60),end:base+7*60};}
-  const am=dayEv.map(e=>minsOf(e.time));
-  const all=nm?[...am,nm]:am;
+  const am=dayEv.map(e=>minsOf(e.time)),all=nm?[...am,nm]:am;
   return{start:Math.max(0,Math.min(...all)-60),end:Math.min(24*60,Math.max(...all)+90)};
 }
-
-function renderTimeline(dayEv) {
+function renderTimeline(dayEv){
   const bar=document.getElementById('tlBar'),ruler=document.getElementById('ruler'),needle=document.getElementById('needle');
   Array.from(bar.children).forEach(c=>{if(!c.classList.contains('needle'))bar.removeChild(c);});
   ruler.innerHTML='';
-  const isToday=viewDate===todayStr();
-  const{start,end}=getRange(dayEv);const span=end-start;
+  const isToday=viewDate===todayStr();const{start,end}=getRange(dayEv);const span=end-start;
   document.getElementById('tlLabel').textContent=`Timeline · ${prettyDate(viewDate)}`;
-  // ticks
   for(let h=Math.ceil(start/60);h<=Math.floor(end/60);h++){
-    const pct=((h*60-start)/span)*100;
-    if(pct<0||pct>100) continue;
+    const pct=((h*60-start)/span)*100;if(pct<0||pct>100)continue;
     const tk=document.createElement('div');tk.className='htick';tk.style.left=pct+'%';
-    const ap=h>=12?'PM':'AM';
-    tk.innerHTML=`${h%12||12}<span>${ap}</span><div class="htick-bar"></div>`;
+    tk.innerHTML=`${h%12||12}<span>${h>=12?'PM':'AM'}</span><div class="htick-bar"></div>`;
     ruler.appendChild(tk);
   }
-  // needle
-  if(isToday){
-    const nm=new Date().getHours()*60+new Date().getMinutes()+new Date().getSeconds()/60;
-    needle.style.left=Math.min(100,Math.max(0,((nm-start)/span)*100))+'%';
-    needle.style.display='';
-  } else needle.style.display='none';
-  // segments
+  if(isToday){const nm=new Date().getHours()*60+new Date().getMinutes()+new Date().getSeconds()/60;needle.style.left=Math.min(100,Math.max(0,((nm-start)/span)*100))+'%';needle.style.display='';}
+  else needle.style.display='none';
   const sorted=[...dayEv].sort((a,b)=>a.time.localeCompare(b.time));
   sorted.forEach((ev,i)=>{
-    const evM=minsOf(ev.time);const pct=((evM-start)/span)*100;
-    const prevM=i===0?start:minsOf(sorted[i-1].time);
-    const sS=Math.max(start,prevM),sE=evM;
+    const evM=minsOf(ev.time),pct=((evM-start)/span)*100;
+    const prevM=i===0?start:minsOf(sorted[i-1].time),sS=Math.max(start,prevM),sE=evM;
     if(sE>sS){
       const color=COLORS[ev.colorIdx%COLORS.length];
       const seg=document.createElement('div');seg.className='seg';
@@ -1293,7 +1168,7 @@ function renderTimeline(dayEv) {
       seg.appendChild(sl);bar.insertBefore(seg,needle);
     }
     if(pct>=-1&&pct<=101){
-      const color=COLORS[ev.colorIdx%COLORS.length];const cp=Math.min(96,Math.max(4,pct));
+      const color=COLORS[ev.colorIdx%COLORS.length],cp=Math.min(96,Math.max(4,pct));
       const pin=document.createElement('div');pin.className='pin';pin.style.left=cp+'%';
       pin.innerHTML=`<div class="pin-dot" style="color:${color};border-color:${color}"></div><div class="pin-line" style="background:${color}55"></div><div class="pin-lbl" style="color:${color}">${fmtAP(ev.time)}<br>${ev.emoji}</div>`;
       bar.appendChild(pin);
@@ -1302,9 +1177,9 @@ function renderTimeline(dayEv) {
 }
 
 /* ════════════════════════════════════════
-   EVENT CARDS
+   CARDS
 ════════════════════════════════════════ */
-function renderCards(dayEv) {
+function renderCards(dayEv){
   const grid=document.getElementById('evGrid');grid.innerHTML='';
   const today=todayStr(),nd=new Date();
   const sorted=[...dayEv].sort((a,b)=>a.time.localeCompare(b.time));
@@ -1315,7 +1190,7 @@ function renderCards(dayEv) {
     return;
   }
   sorted.forEach((ev,i)=>{
-    const dt=parseDT(ev.date,ev.time);const ms=dt-nd;const isPast=ms<0;
+    const dt=parseDT(ev.date,ev.time),ms=dt-nd,isPast=ms<0;
     const isNext=!isPast&&!nextEv&&ev.date>=today;if(isNext)nextEv=ev;
     const color=COLORS[ev.colorIdx%COLORS.length];
     const card=document.createElement('div');
@@ -1338,38 +1213,26 @@ function renderCards(dayEv) {
       <div class="card-cd-lbl">${isPast?'passed':'remaining'}</div>`;
     grid.appendChild(card);
   });
-  // actions
   grid.querySelectorAll('[data-act]').forEach(btn=>{
     btn.addEventListener('click',async e=>{
-      e.stopPropagation();
-      const{id,act}=btn.dataset;
-      if(act==='del') await deleteEvent(id);
-      else if(act==='alarm'){
-        const ev=window._events.find(e=>e.id===id);
-        if(ev){if(!ev.alarm)reqNotif();await toggleAlarm(id,!ev.alarm);}
-      }
+      e.stopPropagation();const{id,act}=btn.dataset;
+      if(act==='del') await deleteEventFS(id);
+      else if(act==='alarm'){const ev=window._events.find(e=>e.id===id);if(ev){if(!ev.alarm)reqNotif();await toggleAlarmFS(id,!ev.alarm);}}
     });
   });
 }
 
 /* ════════════════════════════════════════
-   HERO + SUMMARY
+   HERO
 ════════════════════════════════════════ */
-function updateHero() {
+function updateHero(){
   const nd=new Date();
   const future=window._events.filter(e=>parseDT(e.date,e.time)>nd)
     .sort((a,b)=>parseDT(a.date,a.time)-parseDT(b.date,b.time));
-  const nextEv=future[0]||null;
-  const pastC=window._events.filter(e=>parseDT(e.date,e.time)<nd).length;
+  const nextEv=future[0]||null,pastC=window._events.filter(e=>parseDT(e.date,e.time)<nd).length;
   document.getElementById('hCount').textContent=window._events.length;
   document.getElementById('hPast').textContent=pastC+' past';
-  if(!nextEv){
-    document.getElementById('hFree').textContent='∞';
-    document.getElementById('hFreeSub').textContent='no upcoming events';
-    document.getElementById('hName').textContent='—';
-    document.getElementById('hTime').textContent='—';
-    return;
-  }
+  if(!nextEv){document.getElementById('hFree').textContent='∞';document.getElementById('hFreeSub').textContent='no upcoming events';document.getElementById('hName').textContent='—';document.getElementById('hTime').textContent='—';return;}
   const ms=parseDT(nextEv.date,nextEv.time)-nd;
   document.getElementById('hFree').textContent=fmtCD(ms);
   document.getElementById('hFreeSub').textContent=`until ${nextEv.emoji} ${nextEv.name}`;
@@ -1380,50 +1243,36 @@ function updateHero() {
 /* ════════════════════════════════════════
    RENDER ALL
 ════════════════════════════════════════ */
-window._renderAll = function() {
+window._renderAll = function(){
   const dayEv=window._events.filter(e=>e.date===viewDate);
-  buildDayTabs();
-  renderTimeline(dayEv);
-  renderCards(dayEv);
-  updateHero();
+  buildDayTabs();renderTimeline(dayEv);renderCards(dayEv);updateHero();
 };
 
 /* ════════════════════════════════════════
    TICK
 ════════════════════════════════════════ */
-function tick() {
-  tickClock();
-  checkAlarms();
-  updateHero();
+function tick(){
+  tickClock();checkAlarms();updateHero();
   const nd=new Date();
-  window._events.forEach(ev=>{
-    const el=document.getElementById('cd-'+ev.id);if(!el)return;
-    const ms=parseDT(ev.date,ev.time)-nd;el.textContent=ms<0?'—':fmtCD(ms);
-  });
-  // needle
+  window._events.forEach(ev=>{const el=document.getElementById('cd-'+ev.id);if(!el)return;const ms=parseDT(ev.date,ev.time)-nd;el.textContent=ms<0?'—':fmtCD(ms);});
   if(viewDate===todayStr()){
     const dayEv=window._events.filter(e=>e.date===viewDate);
-    const{start,end}=getRange(dayEv);const span=end-start;
-    const nm=nd.getHours()*60+nd.getMinutes()+nd.getSeconds()/60;
+    const{start,end}=getRange(dayEv),nm=nd.getHours()*60+nd.getMinutes()+nd.getSeconds()/60;
     const n=document.getElementById('needle');
-    if(n&&n.style.display!=='none') n.style.left=Math.min(100,Math.max(0,((nm-start)/span)*100))+'%';
+    if(n&&n.style.display!=='none')n.style.left=Math.min(100,Math.max(0,((nm-start)/(end-start))*100))+'%';
   }
 }
 
 /* ════════════════════════════════════════
    ALARMS
 ════════════════════════════════════════ */
-function checkAlarms() {
+function checkAlarms(){
   const d=new Date(),today=todayStr();
   const hhmm=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   if(d.getHours()===0&&d.getMinutes()===0)fired.clear();
-  window._events.forEach(ev=>{
-    if(ev.alarm&&ev.date===today&&ev.time===hhmm&&!fired.has(ev.id)&&d.getSeconds()<30){
-      fired.add(ev.id);showToast(ev);
-    }
-  });
+  window._events.forEach(ev=>{if(ev.alarm&&ev.date===today&&ev.time===hhmm&&!fired.has(ev.id)&&d.getSeconds()<30){fired.add(ev.id);showToast(ev);}});
 }
-function showToast(ev) {
+function showToast(ev){
   document.getElementById('tIcon').textContent=ev.emoji;
   document.getElementById('tName').textContent=ev.name;
   document.getElementById('tTime').textContent=`Starting at ${fmtAP(ev.time)}`;
@@ -1434,22 +1283,13 @@ function showToast(ev) {
 }
 document.getElementById('tDis').addEventListener('click',()=>document.getElementById('toast').classList.remove('show'));
 function playAlarm(){
-  try{
-    if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();
-    const ctx=actx;
-    [[523.25,0],[659.25,.22],[783.99,.44],[1046.5,.66],[523.25,1.05],[659.25,1.27],[783.99,1.49],[1046.5,1.71]].forEach(([f,dt])=>{
-      const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+dt;
-      o.type='sine';o.frequency.value=f;
-      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.04);g.gain.exponentialRampToValueAtTime(.001,t+.5);
-      o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+.55);
-    });
-  }catch(e){}
+  try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const ctx=actx;[[523.25,0],[659.25,.22],[783.99,.44],[1046.5,.66],[523.25,1.05],[659.25,1.27],[783.99,1.49],[1046.5,1.71]].forEach(([f,dt])=>{const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+dt;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.04);g.gain.exponentialRampToValueAtTime(.001,t+.5);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+.55);});}catch(e){}
   if(navigator.vibrate)navigator.vibrate([200,80,200,80,400]);
 }
 function reqNotif(){if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();}
 
 /* ════════════════════════════════════════
-   ADD EVENT MODAL
+   MODAL
 ════════════════════════════════════════ */
 const overlay=document.getElementById('overlay');
 const openModal=()=>{overlay.classList.add('open');document.getElementById('iName').focus();};
@@ -1458,8 +1298,6 @@ document.getElementById('openModal').addEventListener('click',openModal);
 document.getElementById('closeModal').addEventListener('click',closeModal);
 document.getElementById('cancelBtn').addEventListener('click',closeModal);
 overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal();});
-
-// Date quick buttons
 document.getElementById('dq').addEventListener('click',e=>{
   const b=e.target.closest('.dqb');if(!b)return;
   document.getElementById('iDate').value=offsetDate(parseInt(b.dataset.o));
@@ -1468,8 +1306,6 @@ document.getElementById('dq').addEventListener('click',e=>{
 document.getElementById('iDate').addEventListener('change',function(){
   document.querySelectorAll('.dqb').forEach(b=>b.classList.toggle('active',this.value===offsetDate(parseInt(b.dataset.o))));
 });
-
-// Emoji
 document.getElementById('emojiG').addEventListener('click',e=>{
   const b=e.target.closest('.ebtn');if(!b)return;
   document.querySelectorAll('.ebtn').forEach(x=>x.classList.remove('active'));
@@ -1479,8 +1315,6 @@ document.getElementById('iType').addEventListener('change',function(){
   const em=TEMO[parseInt(this.value)]||'⭐';selEmoji=em;
   document.querySelectorAll('.ebtn').forEach(b=>b.classList.toggle('active',b.dataset.e===em));
 });
-
-// Save
 document.getElementById('saveBtn').addEventListener('click',async()=>{
   const name=document.getElementById('iName').value.trim();
   const date=document.getElementById('iDate').value;
@@ -1489,9 +1323,8 @@ document.getElementById('saveBtn').addEventListener('click',async()=>{
   const alarm=document.getElementById('iAlarm').checked;
   if(!name||!date||!time){document.getElementById('iName').focus();return;}
   if(alarm)reqNotif();
-  const btn=document.getElementById('saveBtn');
-  btn.disabled=true;btn.textContent='Saving…';
-  await addEvent({name,date,time,emoji:selEmoji,colorIdx,alarm,createdAt:Date.now()});
+  const btn=document.getElementById('saveBtn');btn.disabled=true;btn.textContent='Saving…';
+  await addEventFS({name,date,time,emoji:selEmoji,colorIdx,alarm,createdAt:Date.now()});
   viewDate=date;
   btn.disabled=false;btn.textContent='Save to Cloud →';
   document.getElementById('iName').value='';document.getElementById('iAlarm').checked=false;
@@ -1502,7 +1335,7 @@ document.getElementById('iName').addEventListener('keydown',e=>{if(e.key==='Ente
 /* ════════════════════════════════════════
    DEFAULT FORM VALUES
 ════════════════════════════════════════ */
-(function() {
+(function(){
   const d=new Date(Date.now()+60*60000);
   document.getElementById('iDate').value=offsetDate(0);
   document.getElementById('iTime').value=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
@@ -1515,35 +1348,12 @@ document.getElementById('iName').addEventListener('keydown',e=>{if(e.key==='Ente
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
 /* ════════════════════════════════════════
-   INIT — start clock & ticks
-   (data flows from Firestore via onSnapshot)
+   START CLOCK
 ════════════════════════════════════════ */
 tickClock();
 setInterval(tick, 1000);
 setInterval(window._renderAll, 60000);
 </script>
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyC4BmkITV_T0YE5JZgOeKZp45nNIY3MieE",
-    authDomain: "timespace-39696.firebaseapp.com",
-    projectId: "timespace-39696",
-    storageBucket: "timespace-39696.firebasestorage.app",
-    messagingSenderId: "388405564753",
-    appId: "1:388405564753:web:da5afeefa8dcda1198ef70",
-    measurementId: "G-J69EWSVBPF"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 </body>
 </html>
