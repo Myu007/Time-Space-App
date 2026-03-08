@@ -277,7 +277,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:1.1
 </style>
 </head>
 <body>
-<div id="loadScreen"><div class="load-gem"><svg viewBox="0 0 24 24" fill="none" stroke="#0e0c00" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 12"/></svg></div><div class="load-txt">TimeSpace</div><div class="load-sub">Loading your day...</div></div>
+<div id="loadScreen"><div class="load-gem"><svg viewBox="0 0 24 24" fill="none" stroke="#0e0c00" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 12"/></svg></div><div class="load-txt">TimeSpace</div><div class="load-sub" id="loadSub">Connecting...</div></div>
 <div class="toast" id="toast"><div class="t-icon" id="tIcon">&#x23F0;</div><div class="t-body"><div class="t-name" id="tName">Alarm</div><div class="t-time" id="tTime">-</div></div><button class="t-dis" id="tDis">DISMISS</button></div>
 <div class="sys-toast" id="sysToast" style="display:none"><span class="sys-toast-msg" id="sysMsg">Event deleted</span><button class="sys-toast-act" id="sysAct">UNDO</button><button class="sys-toast-x" id="sysX" onclick="hideSysToast()">&#x2715;</button></div>
 <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon">&#x1F5D1;&#xFE0F;</div><div class="confirm-title">Delete Event?</div><div class="confirm-msg" id="confirmMsg">This cannot be undone.</div><div class="confirm-btns"><button class="confirm-cancel" id="confirmCancel">Keep it</button><button class="confirm-del" id="confirmDel">Delete</button></div></div></div>
@@ -453,10 +453,7 @@ document.getElementById(‘evGrid’).classList.toggle(‘compact’, compactMod
 document.getElementById(‘compactBtn’).style.color = compactMode?‘var(–gold)’:’’;
 document.getElementById(‘userDrop’).classList.remove(‘open’);
 }
-if(compactMode) document.addEventListener(‘DOMContentLoaded’,()=>{
-document.getElementById(‘evGrid’).classList.add(‘compact’);
-document.getElementById(‘compactBtn’).style.color=‘var(–gold)’;
-});
+// compactMode applied in _renderAll - no init needed here
 
 // ── COPY EVENT ──────────────────────────────────────────
 function copyEvent(ev){
@@ -593,6 +590,17 @@ if(navigator.vibrate) navigator.vibrate([100,50,100]);
 
 if(‘serviceWorker’in navigator)navigator.serviceWorker.register(’./sw.js’).catch(()=>{});
 tickClock();setInterval(tick,1000);setInterval(window._renderAll,60000);
+// Update loading message
+setTimeout(function(){var s=document.getElementById(‘loadSub’);if(s)s.textContent=‘Loading your day…’;},800);
+setTimeout(function(){var s=document.getElementById(‘loadSub’);if(s&&document.getElementById(‘loadScreen’)&&!document.getElementById(‘loadScreen’).classList.contains(‘hidden’))s.textContent=‘Still connecting…’;},4000);
+// Fallback: if Firebase hangs, show auth after 8s
+setTimeout(function(){
+const ls=document.getElementById(‘loadScreen’);
+if(ls&&!ls.classList.contains(‘hidden’)){
+ls.classList.add(‘hidden’);
+document.getElementById(‘authScreen’).classList.add(‘visible’);
+}
+},8000);
 </script>
 
 </body>
