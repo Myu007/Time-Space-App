@@ -255,7 +255,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:1.1
 .t-name{font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .t-time{font-family:'DM Mono',monospace;font-size:.67rem;opacity:.75;margin-top:2px}
 .t-dis{background:rgba(0,0,0,.18);border:none;border-radius:8px;color:#0e0c00;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700;padding:.38rem .75rem;cursor:pointer;flex-shrink:0}
-.sys-toast{position:fixed;bottom:max(1.5rem,calc(var(--sb)+1.5rem));left:50%;transform:translateX(-50%) translateY(100px);z-index:2000;background:var(--s1);border:1px solid var(--b2);color:var(--t1);border-radius:var(--rl);padding:.8rem 1.1rem;display:flex;align-items:center;gap:.9rem;min-width:260px;max-width:92vw;box-shadow:0 8px 32px rgba(0,0,0,.3);transition:transform .4s var(--spring)}
+.sys-toast{position:fixed;bottom:max(1.5rem,calc(var(--sb)+1.5rem));left:50%;transform:translateX(-50%) translateY(200px);z-index:2000;background:var(--s1);border:1px solid var(--b2);color:var(--t1);border-radius:var(--rl);padding:.8rem 1.1rem;display:flex;align-items:center;gap:.9rem;min-width:260px;max-width:92vw;box-shadow:0 8px 32px rgba(0,0,0,.3);transition:transform .4s var(--spring)}
 .sys-toast.show{transform:translateX(-50%) translateY(0)}
 .sys-toast-msg{flex:1;font-size:.85rem;font-weight:500}
 .sys-toast-act{font-family:'DM Mono',monospace;font-size:.68rem;font-weight:600;color:var(--gold);cursor:pointer;border:none;background:transparent;padding:.2rem .4rem}.sys-toast-x{width:22px;height:22px;border-radius:6px;background:var(--b2);border:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0;transition:background .15s}.sys-toast-x:hover{background:var(--b3);color:var(--t1)}
@@ -304,7 +304,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:1.1
       <div class="afield"><label class="aflabel">Confirm Password</label><input class="afinput" id="signPass2" type="password" placeholder="Repeat password" autocomplete="new-password"/></div>
       <button class="auth-submit" id="signupBtn" onclick="emailSignup()">Create Account</button>
     </div>
-    <div class="auth-note">Google &amp; Email work immediately. Facebook &amp; Apple require extra setup.</div>
+    <div class="auth-note">Google &amp; Email work immediately. Facebook &amp; Apple will be enabled in a future update.</div>
   </div>
 </div>
 <div id="appScreen">
@@ -358,7 +358,7 @@ const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov',
 const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 window._events=[];window._currentUser=null;
 let selEmoji='\u{1F393}',viewDate=todayStr(),fired=new Set(),actx=null,editingId=null,searchQ='',undoData=null,undoTimer=null;
-function showAuth(){document.getElementById('loadScreen').classList.add('hidden');document.getElementById('authScreen').classList.add('visible');document.getElementById('appScreen').classList.remove('visible');}
+function showAuth(){document.getElementById('loadScreen').classList.add('hidden');document.getElementById('authScreen').classList.add('visible');document.getElementById('appScreen').classList.remove('visible');hideSysToast();}
 function showApp(user){document.getElementById('loadScreen').classList.add('hidden');document.getElementById('authScreen').classList.remove('visible');document.getElementById('appScreen').classList.add('visible');const name=user.displayName||user.email?.split('@')[0]||'You';document.getElementById('userName').textContent=name.split(' ')[0];document.getElementById('dropEmail').textContent=user.email||'No email';const av=document.getElementById('userAvatar');if(user.photoURL)av.innerHTML='<img src="'+user.photoURL+'" alt="">';else av.textContent=name.charAt(0).toUpperCase();}
 function switchTab(t){document.getElementById('loginForm').style.display=t==='login'?'block':'none';document.getElementById('signupForm').style.display=t==='signup'?'block':'none';document.getElementById('tabLogin').classList.toggle('active',t==='login');document.getElementById('tabSignup').classList.toggle('active',t==='signup');clearMsg();}
 function showErr(m){const e=document.getElementById('authError');e.textContent=m;e.classList.add('show');document.getElementById('authSuccess').classList.remove('show');}
